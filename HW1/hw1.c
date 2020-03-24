@@ -46,7 +46,7 @@ int hw1_init(void) {
     printk(KERN_INFO "Traverse the student list\n");
     node_student* stu;
     list_for_each_entry(stu, &student_list, node_link) {
-        printk("%d, %d-%d-%d.\n",stu->id,stu->year,stu->month,stu->day);
+        printk("%d, %d-%d-%d.\n",stu->id,stu->day,stu->month,stu->year);
     };
     printk(KERN_INFO "Success!\n");
     return 0;
@@ -55,11 +55,11 @@ int hw1_init(void) {
 /* Module exist point */
 void hw1_exit(void) {
     node_student *stu, *tmp;
-    printk(KERN_INFO "Remove Module\n");
     list_for_each_entry_safe(stu, tmp, &student_list, node_link) {
         list_del(&stu->node_link);
         kfree(stu);
     }
+    printk(KERN_INFO "Remove Module\n");
 }
 
 /* Register module entry/exit pts */
