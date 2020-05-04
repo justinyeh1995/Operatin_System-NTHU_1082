@@ -54,14 +54,15 @@ int main (int argc, char *argv[]) {
     char **buffer = malloc(count_lines*sizeof(char*));
     
     for(int i = 0; i < count_lines; i++) {
+        
         buffer[i] = malloc(LINE_MAX*sizeof(char*));
 
-        printf("%d\n", (int)strlen(buffer[i]));
     }
     
     int **unsorted_array = malloc(count_lines*sizeof(int*));
     
     for(int i = 0; i < count_lines; i++) {
+        
         unsorted_array[i] = malloc(count_each_lines[i]*sizeof(int*));
     }
     
