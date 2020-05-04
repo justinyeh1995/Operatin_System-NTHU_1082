@@ -95,7 +95,7 @@ int main (int argc, char *argv[]) {
             fprintf(fp_out, "%d ", unsorted_array[i][j]);
         }
         
-        fprintf(fp_out, "\nduration: %f\n\n", time_spent);
+        fprintf(fp_out, "\nduration:%f\n\n", time_spent);
     }
     /*Body end*/
     
