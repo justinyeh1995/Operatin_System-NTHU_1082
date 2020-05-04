@@ -10,6 +10,8 @@ int* each_length(FILE * fp, int length);
 void textfile_parser(char **buffer, int **unsorted_array, int *each_items_count, FILE *fp_in, int count);
 void merge(int *arr, int l, int m, int r);
 void mergesort(int *arr, int l, int r);
+void *sortArray(void *params);
+void *mergeArray(void *params);
 void printArray(int *A, int size);
 void Multithread_MergeSort(int *arr, int length);
 
