@@ -3,8 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#define LINE_MAX 20001
-#define MAX_COUNT 10000
+#define LINE_MAX 200000
 #define THREAD_COUNT 3
 int  count(FILE * fp);
 int* each_length(FILE * fp, int length);
@@ -14,6 +13,7 @@ void mergesort(int *arr, int l, int r);
 void printArray(int *A, int size);
 void Multithread_MergeSort(int *arr, int length);
 
+/* A single argument that will be passed to start_routine in pthread_create*/
 typedef struct
 {
     int from_index;
@@ -52,7 +52,9 @@ int main (int argc, char *argv[]) {
     char **buffer = malloc(count_lines*sizeof(char*));
     
     for(int i = 0; i < count_lines; i++) {
-        buffer[i] = malloc(count_each_lines[i]*sizeof(char*));
+        buffer[i] = malloc(LINE_MAX*sizeof(char*));
+
+        printf("%d\n", (int)strlen(buffer[i]));
     }
     
     int **unsorted_array = malloc(count_lines*sizeof(int*));
@@ -74,7 +76,7 @@ int main (int argc, char *argv[]) {
     
         /*Merge sort begin*/
         Multithread_MergeSort(unsorted_array[i], count_each_lines[i]);
-        //mergesort(unsorted_array[i], 0, count_each_lines[i]-1);
+        
         printArray(unsorted_array[i], count_each_lines[i]);    
         /*Merge sort end*/
         
@@ -144,7 +146,6 @@ int* each_length(FILE * fp, int length) {
     
         }
     
-        //Count whenever new line is encountered
         if (chr== '\n')
         {
     
@@ -153,7 +154,6 @@ int* each_length(FILE * fp, int length) {
             i += 1;
         }
     
-        //take next character from file.
         chr = getc(fp);
     }
     
@@ -161,33 +161,31 @@ int* each_length(FILE * fp, int length) {
 }
 
 void textfile_parser(char **buffer, int **unsorted_array, int *count_each_lines, FILE *fp_in, int count_lines) {
+    
     int i = 0;
     
     while(fgets(buffer[i], LINE_MAX, fp_in)) 
 	{
     
-        buffer[i][strlen(buffer[i]) - 1] = '\0';
-    
+        buffer[i][strlen(buffer[i]) - 1] = '\0'; //replace '\n' with '\0'
+       
         int ipos = 0;
     
         // Get the first token from the string
         char *token = strtok(buffer[i], " ");
     
-        // Keep going until we run out of tokens
+        // Fetch until there's no token
         while (token != NULL) {
     
-            // Don't overflow your target array
-            if (ipos < MAX_COUNT) {
+            // Don't overflow the target array
+            if (ipos < count_each_lines[i]) {
     
                 // Convert to integer and store it
                 unsorted_array[i][ipos++] = atoi(token);
     
             }
     
-            // Get the next token from the string - note the use of NULL
-            // instead of the string in this case - that tells it to carry
-            // on from where it left off.
-    
+            // Get the next token from the string
             token = strtok(NULL, " ");
         }
     
@@ -206,10 +204,7 @@ void textfile_parser(char **buffer, int **unsorted_array, int *count_each_lines,
             printf("\n");
     }
 }
-
-// Merges two subarrays of arr[]. 
-// First subarray is arr[l..m] 
-// Second subarray is arr[m+1..r] 
+ 
 void merge(int *arr, int l, int m, int r) 
 { 
     int i, j, k; 
@@ -218,10 +213,10 @@ void merge(int *arr, int l, int m, int r)
 
     int n2 =  r - m; 
   
-    /* create temp arrays */
+    // Create temp arrays
     int L[n1], R[n2]; 
   
-    /* Copy data to temp arrays L[] and R[] */
+    // Copy data to temp arrays L[] and R[] 
     for (i = 0; i < n1; i++) 
         L[i] = arr[l + i]; 
 
@@ -236,11 +231,9 @@ void merge(int *arr, int l, int m, int r)
     
     k = l; // Initial index of merged subarray 
     
-    while (i < n1 && j < n2) 
-    { 
+    while (i < n1 && j < n2) { 
     
-        if (L[i] <= R[j]) 
-        { 
+        if (L[i] <= R[j]) { 
     
             arr[k] = L[i]; 
     
@@ -248,8 +241,7 @@ void merge(int *arr, int l, int m, int r)
     
         } 
     
-        else
-        { 
+        else { 
     
             arr[k] = R[j]; 
     
@@ -261,8 +253,7 @@ void merge(int *arr, int l, int m, int r)
   
     /* Copy the remaining elements of L[], if there 
        are any */
-    while (i < n1) 
-    { 
+    while (i < n1) { 
     
         arr[k] = L[i]; 
     
@@ -273,8 +264,7 @@ void merge(int *arr, int l, int m, int r)
   
     /* Copy the remaining elements of R[], if there 
        are any */
-    while (j < n2) 
-    { 
+    while (j < n2) { 
     
         arr[k] = R[j]; 
     
@@ -284,43 +274,37 @@ void merge(int *arr, int l, int m, int r)
     } 
 } 
   
-/* l is for left index and r is right index of the 
-   sub-array of arr to be sorted */
 void mergesort(int *arr, int l, int r) 
 { 
-    if (l < r) 
-    { 
-        // Same as (l+r)/2, but avoids overflow for 
-        // large l and h 
+    if (l < r) { 
+       
         int m = l+(r-l)/2; 
   
-        // Sort first and second halves 
+        // Sort two halves 
         mergesort(arr, l, m); 
         mergesort(arr, m+1, r); 
-  
+        // Merge two halves
         merge(arr, l, m, r); 
     } 
 } 
-  
-/* UTILITY FUNCTIONS */
-/* Function to print an array */
-void printArray(int *A, int size) 
-{ 
-    int i; 
 
-    for (i=0; i < size; i++) 
-        printf("%d ", A[i]); 
+void printArray(int *arr, int size) 
+{  
+
+    for (int i=0; i < size; i++) 
+        printf("%d ", arr[i]); 
     
     printf("\n"); 
 }
 
+/* Start_Rountine used in pthread_create */
 void *sortArray(void *params)
 
 {
 
     parameters* p = (parameters *)params;
 
-    //SORT
+    // SORT
 
     int begin = p->from_index;
 
@@ -329,15 +313,17 @@ void *sortArray(void *params)
     int *array = p->arr;
 
     mergesort(array, begin, end);
-
+    
+    // Exit thread
     pthread_exit(0);
 }
 
+/* Start_Rountine used in pthread_create */
 void *mergeArray(void *params) {
     
     parameters* p = (parameters *)params;
 
-    //MERGE
+    // MERGE
 
     int begin = p->from_index;
 
@@ -349,56 +335,60 @@ void *mergeArray(void *params) {
 
     merge(array, begin, middle, end);
 
+    // Exit thread
     pthread_exit(0);
 
 }
 
 void Multithread_MergeSort(int *arr, int length) {
+    
+    // Create 3 threads
     pthread_t threads[THREAD_COUNT];
 
-    /* establish the first sorting thread */
+    // Establish the first sorting thread
 
-    parameters *data = (parameters *) malloc (sizeof(parameters));
+    parameters *data_1st = malloc (sizeof(parameters*));
 
-    data->from_index = 0;
+    data_1st->from_index = 0;
 
-    data->to_index = 0 + ((length-1)/2);
-    printf("middle: %d\n", data->to_index);
+    data_1st->to_index = 0 + ((length-1)/2);
+    printf("middle: %d\n", data_1st->to_index);
 
-    data->arr = arr;
+    data_1st->arr = arr;
 
-    pthread_create(&threads[0], 0, sortArray, data);
-        /* establish the second sorting thread */
+    pthread_create(&threads[0], 0, sortArray, data_1st);
+    
+    // Establish the second sorting thread
 
-    data = (parameters *) malloc (sizeof(parameters));
+    parameters *data_2nd = malloc (sizeof(parameters*));
 
-    data->from_index = ((length-1)/2) + 1;
+    data_2nd->from_index = ((length-1)/2) + 1;
 
-    data->to_index = length - 1;
+    data_2nd->to_index = length - 1;
 
-    data->arr = arr;
+    data_2nd->arr = arr;
 
-    pthread_create(&threads[1], 0, sortArray, data);
+    pthread_create(&threads[1], 0, sortArray, data_2nd);
 
-    /* now wait for the 2 sorting threads to finish */
+    // Wait for the 2 sorting threads to finish
 
     for (int i = 0; i < THREAD_COUNT - 1; i++)
 
         pthread_join(threads[i], NULL);
 
-    /* establish the merge thread */
+    // Establish the merge thread 
 
-    data = (parameters *) malloc(sizeof(parameters));
+    parameters *data_3rd = malloc(sizeof(parameters*));
 
-    data->from_index = 0;
+    data_3rd->from_index = 0;
 
-    data->to_index = length - 1;
+    data_3rd->to_index = length - 1;
 
-    data->arr = arr;
+    data_3rd->arr = arr;
 
-    pthread_create(&threads[2], 0, mergeArray, data);
+    pthread_create(&threads[2], 0, mergeArray, data_3rd);
 
-    /* wait for the merge thread to finish */
+    // Wait for the merge thread to finish 
 
     pthread_join(threads[2], NULL);
 
