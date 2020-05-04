@@ -109,11 +109,9 @@ int count(FILE * fp) {
     
     int count_lines = 0;
     
-    while (chr != EOF)
-    {
+    while (chr != EOF) {
         //Count whenever new line is encountered
-        if (chr== '\n')
-        {
+        if (chr== '\n') {
     
             count_lines = count_lines + 1;
     
@@ -137,8 +135,7 @@ int* each_length(FILE * fp, int length) {
     
     for(int i = 0; i < length; i ++) count_each_lines[i] = 0;
     
-    while (chr != EOF)
-    {
+    while (chr != EOF) {
     
         if(chr == ' ') {
     
@@ -146,8 +143,7 @@ int* each_length(FILE * fp, int length) {
     
         }
     
-        if (chr== '\n')
-        {
+        if (chr== '\n') {
     
             count_each_lines[i] += 1;
     
@@ -164,8 +160,7 @@ void textfile_parser(char **buffer, int **unsorted_array, int *count_each_lines,
     
     int i = 0;
     
-    while(fgets(buffer[i], LINE_MAX, fp_in)) 
-	{
+    while(fgets(buffer[i], LINE_MAX, fp_in)) {
     
         buffer[i][strlen(buffer[i]) - 1] = '\0'; //replace '\n' with '\0'
        
