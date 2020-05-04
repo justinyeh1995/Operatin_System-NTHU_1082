@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <ctype.h>
 #define LINE_MAX 200000
 #define THREAD_COUNT 3
 int  count(FILE * fp);
@@ -44,6 +45,8 @@ int main (int argc, char *argv[]) {
     fp_count = fopen(in_file, "r");
     
     int count_lines = count(fp_count);
+
+    printf("%d\n", count_lines);
     
     fp_count = fopen(in_file, "r");
     
@@ -62,6 +65,8 @@ int main (int argc, char *argv[]) {
     int **unsorted_array = malloc(count_lines*sizeof(int*));
     
     for(int i = 0; i < count_lines; i++) {
+
+        //printf("%d ", count_each_lines[i]);
         
         unsorted_array[i] = malloc(count_each_lines[i]*sizeof(int*));
     }
@@ -107,25 +112,18 @@ int main (int argc, char *argv[]) {
 
 int count(FILE * fp) {
     
-    /* Count numbers of line */
-    char chr = getc(fp);
+    // /* Count numbers of line */
+    int count_line = 0;
+
+    char temp[LINE_MAX];
     
-    int count_lines = 0;
+    while(fgets(temp, LINE_MAX, fp)) {
     
-    while (chr != EOF) {
-        //Count whenever new line is encountered
-        if (chr== '\n') {
-    
-            count_lines = count_lines + 1;
-    
-        }
-    
-        //take next character from file.
-        chr = getc(fp);
+        count_line++;
     
     }
     
-    return count_lines;
+    return count_line;
 }
 
 int* each_length(FILE * fp, int length) {
@@ -136,7 +134,7 @@ int* each_length(FILE * fp, int length) {
     
     int *count_each_lines = malloc(length*sizeof(int *));
     
-    for(int i = 0; i < length; i ++) count_each_lines[i] = 0;
+    for(int i = 0; i < length; i ++) count_each_lines[i] = 1;
     
     while (chr != EOF) {
     
@@ -148,7 +146,7 @@ int* each_length(FILE * fp, int length) {
     
         if (chr== '\n') {
     
-            count_each_lines[i] += 1;
+            //count_each_lines[i] += 1;
     
             i += 1;
         }
@@ -164,30 +162,31 @@ void textfile_parser(char **buffer, int **unsorted_array, int *count_each_lines,
     int i = 0;
     
     while(fgets(buffer[i], LINE_MAX, fp_in)) {
-    
-        buffer[i][strlen(buffer[i]) - 1] = '\0'; //replace '\n' with '\0'
-       
+
         int ipos = 0;
     
         // Get the first token from the string
-        char *token = strtok(buffer[i], " ");
-    
+        char *token = strtok(buffer[i], " \n");
+        
         // Fetch until there's no token
         while (token != NULL) {
-    
-            // Don't overflow the target array
-            if (ipos < count_each_lines[i]) {
+            
+            // Don't get impacted by trailing whitespace 
+            if (ipos < count_each_lines[i] && !(isspace(*token))) {
     
                 // Convert to integer and store it
                 unsorted_array[i][ipos++] = atoi(token);
     
             }
-    
+            
             // Get the next token from the string
-            token = strtok(NULL, " ");
+            token = strtok(NULL, " \n");
         }
-    
+        // Update count_each_lines[i] to the real number of items
+        count_each_lines[i] = ipos;
+
         i++;
+        
     }
 
     /*Parse Checker*/
