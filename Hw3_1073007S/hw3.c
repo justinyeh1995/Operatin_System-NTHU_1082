@@ -4,7 +4,7 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
-#define LINE_MAX 200000
+#define LINE_MAX 2000000
 #define THREAD_COUNT 3
 int  count(FILE * fp);
 int* each_length(FILE * fp, int length);
@@ -46,7 +46,7 @@ int main (int argc, char *argv[]) {
     
     int count_lines = count(fp_count);
 
-    printf("%d\n", count_lines);
+    //printf("%d\n", count_lines);
     
     fp_count = fopen(in_file, "r");
     
@@ -83,16 +83,18 @@ int main (int argc, char *argv[]) {
         clock_t begin = clock();
     
         /*Merge sort begin*/
-        Multithread_MergeSort(unsorted_array[i], count_each_lines[i]);
         
-        printArray(unsorted_array[i], count_each_lines[i]);    
+	    Multithread_MergeSort(unsorted_array[i], count_each_lines[i]);
+          
         /*Merge sort end*/
         
         clock_t end = clock();
         
         time_spent += (double)(end - begin)/CLOCKS_PER_SEC;
         
-        printf("Duration: %f \n", time_spent);
+	    //printArray(unsorted_array[i], count_each_lines[i]);          
+	
+	    printf("duration: %f \n\n", time_spent);
         
         /*Write to output.txt*/
         for(int j = 0; j < count_each_lines[i]; j++) {
@@ -145,9 +147,7 @@ int* each_length(FILE * fp, int length) {
         }
     
         if (chr== '\n') {
-    
-            //count_each_lines[i] += 1;
-    
+      
             i += 1;
         }
     
@@ -190,16 +190,16 @@ void textfile_parser(char **buffer, int **unsorted_array, int *count_each_lines,
     }
 
     /*Parse Checker*/
-    for(int i = 0; i < count_lines; i++) {
+    // for(int i = 0; i < count_lines; i++) {
     
-        printf("Line %d: %d items\n", i+1, count_each_lines[i]);
+    //     printf("Line %d: %d items\n", i+1, count_each_lines[i]);
     
-        for(int j = 0; j < count_each_lines[i]; j++) {
+    //     for(int j = 0; j < count_each_lines[i]; j++) {
     
-            printf("%d ", unsorted_array[i][j]); 
-        }
-            printf("\n");
-    }
+    //         printf("%d ", unsorted_array[i][j]); 
+    //     }
+    //         printf("\n");
+    // }
 }
  
 void merge(int *arr, int l, int m, int r) 
@@ -349,7 +349,8 @@ void Multithread_MergeSort(int *arr, int length) {
     data_1st->from_index = 0;
 
     data_1st->to_index = 0 + ((length-1)/2);
-    printf("middle: %d\n", data_1st->to_index);
+    
+    //printf("middle: %d\n", data_1st->to_index);
 
     data_1st->arr = arr;
 
@@ -362,6 +363,8 @@ void Multithread_MergeSort(int *arr, int length) {
     data_2nd->from_index = ((length-1)/2) + 1;
 
     data_2nd->to_index = length - 1;
+
+    //printf("last: %d\n", data_2nd->to_index);
 
     data_2nd->arr = arr;
 
