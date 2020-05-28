@@ -128,7 +128,7 @@ void *philosopher(void *param) {
 
     random = (int)(rand()%3 + 1);
 
-    printf("Philosopher %d is now EATING for %d seconds.\n", index, random);
+    printf("Philosopher %d is now EATING.\n", index);
 
     sleep(random);
 
