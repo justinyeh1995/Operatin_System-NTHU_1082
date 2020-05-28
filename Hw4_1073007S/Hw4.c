@@ -12,14 +12,12 @@ void init();
 void *philosopher(void *param);
 
 typedef struct {
-
     int index;
-
 } parameters;
 
-enum { thinking, hungry, eating } state[5];	// philospher states
-pthread_mutex_t lock;							// mutex for accessing philospher states to avoid deadlock
-pthread_cond_t self[5];
+enum { thinking, hungry, eating } state[5];	// philospher's states
+pthread_mutex_t lock;						// mutex to protect condition variables
+pthread_cond_t self[5];                     // 5 condition variables
 
 int main() {
 
@@ -36,13 +34,8 @@ int main() {
         parameters *param = malloc (sizeof(parameters*));
         
         param->index = i;
-        
-        //printf("%d\n", param->index);
 
-        // problem: create in reverse order
-        //pthread_mutex_lock(&lock);
         pthread_create(&threads[i], 0, philosopher, param);
-        //pthread_mutex_unlock(&lock);
     }
 
     // Join threads in order
@@ -77,16 +70,17 @@ void pickup_forks(int i) {
     test(i);
 
     /* Fail to pick up forks */
-    if(state[i] != eating) {
+    pthread_mutex_lock(&lock);
+    
+    while(state[i] != eating) {
 
         printf("Philosopher %d can’t pick up forks and start waiting.\n", i);
 
-        pthread_mutex_lock(&lock);
-
         pthread_cond_wait(&self[i], &lock);
 
-        pthread_mutex_unlock(&lock);
     }
+
+    pthread_mutex_unlock(&lock);
     
 }
 
@@ -101,18 +95,19 @@ void return_forks(int i) {
 
 void test(int i) {
 
+    pthread_mutex_lock(&lock);
+
     if( (state[(i+4)%5] != eating) && 
         (state[i] == hungry) &&
         (state[(i+1)%5] != eating) ) {
             
             state[i] = eating;
-            
-            pthread_mutex_lock(&lock);
 
             pthread_cond_signal(&self[i]);
-            
-            pthread_mutex_unlock(&lock);
+
     }
+
+    pthread_mutex_unlock(&lock);
 }
 
 void *philosopher(void *param) {
@@ -120,8 +115,6 @@ void *philosopher(void *param) {
     parameters *p = (parameters *)param;
 
     int index = p->index;
-
-    //printf("%d\n", p->index);
 
     int random = (int)(rand()%3 + 1);
 
